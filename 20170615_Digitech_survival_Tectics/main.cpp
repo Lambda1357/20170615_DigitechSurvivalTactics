@@ -180,7 +180,7 @@ int finditem(shelter* base)
 				else printf("파견인원은 최소 1인 이상은 되어야 하며, 기지에 한명 이상은 남아야 합니다.\n");
 			}
 			int rslt = rand() % (int)(srchbody * 1.5);
-			for (i = 0; base->inven[i].name != "나무"; i++) if (i>19) break;
+			for (i = 0; strcmp(base->inven[i].name, "나무") != 0; i++) if (i > 19) break;
 			if (i < 20)
 			{
 				printf("나무를 %d개 찾았다!",rslt);
@@ -210,7 +210,7 @@ int finditem(shelter* base)
 				else printf("파견인원은 최소 1인 이상은 되어야 하며, 기지에 한명 이상은 남아야 합니다.\n");
 			}
 			int rslt = rand() % (int)(srchbody * 1.5);
-			for (i = 0; base->inven[i].name != "돌"; i++) if(i>19) break;
+			for (i = 0; strcmp(base->inven[i].name, "돌") != 0; i++) if (i > 19) break;
 			if (i < 20)
 			{
 				printf("돌을 %d개 찾았다!", rslt);
@@ -230,6 +230,7 @@ int finditem(shelter* base)
 		break;
 	default:
 		printf("입력에서 오류가 있었습니다.\n");
+		return 0;
 		break;
 	}
 }
@@ -306,9 +307,15 @@ void rescuetribe(shelter* base)
 void daytime(leader* user)
 {
 	int actcnt = DAYTIME_ACTCOUNT;
+	printf("\t%s의 경로당\n", user->username);
+	printf("------------------------------------------------\n\n");
+	printf("                생존자 수 : %d\n\n", user->base->curlife);
+	printf("------------------------------------------------\n\n");
+
+	printf("지금은 낮 시간이다. 아무래도 좀비들의 활동이 줄어들 것 같다.\n");
 	while (actcnt > 1)
 	{
-		printf("낮이다. 뭐하지?");
+		printf("무엇을 할까?\n>> 경로당의 시설을 건설하자 (R)\n>> 자원을 찾으러 떠나자 (F)\n>> 조난당한 사람을 구하자  (S)\n\n알파벳 입력>>");
 		bfclear();
 		char selchar = getchar();
 		switch (selchar)
@@ -333,11 +340,17 @@ void main()
 {
 	leader realuser;
 	shelter base;
+
+	base.maxlife = 10;
+	base.curlife = base.maxlife;
 	realuser.base = &base;
-	strcpy(realuser.base->inven[0].name, "나무");
-	strcpy(realuser.base->inven[1].name, "돌");
+	strcpy(realuser.base->inven[3].name, "나무");
+	strcpy(realuser.base->inven[4].name, "돌");
+
+
 	printf("당신의 이름은 무엇입니까? (영어 20글자 한글 10글자 이내로)");
 	scanf("%s", realuser.username);
+
 
 	for (int i = 0; i < 20; i++)
 		realuser.base->roomspace[i].roomtype = 0;
