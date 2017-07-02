@@ -160,15 +160,14 @@ void buildroom(shelter* m_base)
 	}
 }
 
-//
-void finditem(shelter* base)
+int finditem(shelter* base)
 {
+	int srchbody;
 	printf("1.나무 찾기,2.돌 찾기");
-	char temp = getchar();
 	bfclear();
+	char temp = getchar();
 	switch (temp)
 	{
-		int srchbody;
 	case '1':
 		if (base->curlife > 0)
 		{
@@ -184,15 +183,20 @@ void finditem(shelter* base)
 			for (i = 0; base->inven[i].name != "나무"; i++) if (i>19) break;
 			if (i < 20)
 			{
-				for (int j = 0; rslt <= 0; j++)
+				printf("나무를 %d개 찾았다!",rslt);
+				for (int j = 0; rslt >= 0; j++)
 				{
 					if (base->inven[i].cur_cnt >= base->inven[i].stackmax) break;
 					base->inven[i].cur_cnt++; rslt--;
 				}
+				printf("\t현재 갯수 %d개", base->inven[i].cur_cnt);
+				if (rslt != 0) printf("공간이 모자라 %d개의 자원이 버려졌습니다.",rslt);
+				printf("\n");
+				return 1;
 			}
-			else printf("에러:아이템의 저장위치를 찾을 수 없었습니다.\n");
+			else { printf("에러:아이템의 저장위치를 찾을 수 없었습니다.\n"); return 0; }
 		}
-		else printf("파견보낼 사람이 없습니다.\n");
+		else { printf("파견보낼 사람이 없습니다.\n"); return 0; }
 		break;
 	case '2':
 		if (base->curlife > 0)
@@ -209,15 +213,23 @@ void finditem(shelter* base)
 			for (i = 0; base->inven[i].name != "돌"; i++) if(i>19) break;
 			if (i < 20)
 			{
-				for (int j = 0; rslt <= 0; j++)
+				printf("돌을 %d개 찾았다!", rslt);
+				for (int j = 0; rslt >= 0; j++)
 				{
 					if (base->inven[i].cur_cnt >= base->inven[i].stackmax) break;
 					base->inven[i].cur_cnt++; rslt--;
 				}
+				printf("\t현재 갯수 %d개", base->inven[i].cur_cnt);
+				if (rslt != 0) printf("공간이 모자라 %d개의 자원이 버려졌습니다.", rslt);
+				printf("\n");
+				return 1;
 			}
-			else printf("에러:아이템의 저장위치를 찾을 수 없었습니다.\n");
+			else { printf("에러:아이템의 저장위치를 찾을 수 없었습니다.\n"); return 0; }
 		}
-		else printf("파견보낼 사람이 없습니다.\n");
+		else { printf("파견보낼 사람이 없습니다.\n"); return 0; }
+		break;
+	default:
+		printf("입력에서 오류가 있었습니다.\n");
 		break;
 	}
 }
@@ -293,11 +305,11 @@ void rescuetribe(shelter* base)
 
 void daytime(leader* user)
 {
-	bfclear();
 	int actcnt = DAYTIME_ACTCOUNT;
 	while (actcnt > 1)
 	{
 		printf("낮이다. 뭐하지?");
+		bfclear();
 		char selchar = getchar();
 		switch (selchar)
 		{
@@ -305,7 +317,7 @@ void daytime(leader* user)
 			buildroom(user->base); actcnt--;
 			break;
 		case 'f': case 'F':
-			finditem(user->base); actcnt--;
+			if (finditem(user->base) != 0) actcnt--;
 			break;
 		case 's': case 'S':
 			rescuetribe(user->base);
