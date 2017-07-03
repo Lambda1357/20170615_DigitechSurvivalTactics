@@ -11,6 +11,26 @@ void bfclear()
 {
 	while (getchar() != '\n');
 }
+char* roomtyper(int typecode)
+{
+	switch (typecode)
+	{
+	case 0:
+		return "없음";
+		break;
+	case 1:
+		return "초소";
+		break;
+	case 2:
+		return "식당";
+		break;
+	case 3:
+		return "탐사기지";
+	case 4:
+		return "창고";
+
+	}
+}
 
 struct shelt_room
 {
@@ -40,10 +60,12 @@ struct leader
 	shelter* base;
 };
 
-//건물 업그레이드 미구현
+//건물 업그레이드 미구현, 저장량 상승효과 없음.
 void buildroom(shelter* m_base)
 {
 	{
+		for (int i = 0; i < 5; i++)
+			printf("%d번: %s\t%d번: %s\n%d번: %s\n%d번: %s", i + 1, roomtyper(m_base->roomspace[i].roomtype),i+5,roomtyper(m_base->roomspace[i+4].roomtype),i+10,roomtyper(m_base->roomspace[i+9].roomtype));
 		bfclear();
 		int roomnum;
 		char temp;
