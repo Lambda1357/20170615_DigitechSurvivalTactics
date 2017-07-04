@@ -64,8 +64,8 @@ struct leader
 void buildroom(shelter* m_base)
 {
 	{
-		for (int i = 0; i < 5; i++)
-			printf("%d번: %s\t%d번: %s\n%d번: %s\n%d번: %s", i + 1, roomtyper(m_base->roomspace[i].roomtype),i+5,roomtyper(m_base->roomspace[i+4].roomtype),i+10,roomtyper(m_base->roomspace[i+9].roomtype));
+		/*for (int i = 0; i < 5; i++)
+			printf("%d번: %s\t%d번: %s\n%d번: %s\n%d번: %s", i + 1, roomtyper(m_base->roomspace[i].roomtype),i+5,roomtyper(m_base->roomspace[i+4].roomtype),i+10,roomtyper(m_base->roomspace[i+9].roomtype));*/
 		bfclear();
 		int roomnum;
 		char temp;
@@ -79,6 +79,7 @@ void buildroom(shelter* m_base)
 			case '1':
 				while (1)
 				{
+					printf("몇 번 공간에 방을 만드시겠습니까?");
 					scanf("%d", &roomnum);
 					if (roomnum > 0 && 20 >= roomnum)
 					{
@@ -87,11 +88,11 @@ void buildroom(shelter* m_base)
 						if (m_base->roomspace[roomnum - 1].roomtype == 0)
 						{
 							printf("나무를 %d개 소모합니다. 계속하시겠습니까?(y,n)>>", useitemcnt);
-							char temp = getchar();
 							bfclear();
-							if (temp = ('y' || 'Y'))
+							char temp = getchar();
+							if (temp == 'y' || temp == 'Y')
 							{
-								for (i = 0; m_base->inven[i].name != "나무"; i++);
+								for (i = 0; !strcmp(m_base->inven[i].name, "나무"); i++);
 								if (m_base->inven[i].cur_cnt >= useitemcnt)
 								{
 									m_base->inven[i].cur_cnt -= useitemcnt;
@@ -105,13 +106,16 @@ void buildroom(shelter* m_base)
 					}
 					else printf("유효한 값을 입력해주세요.\n");
 					printf("그만두시겠습니까? (그만두려면 y 입력)>>");
-					if (getchar() == ('y' || 'Y')) break;
+					bfclear();
+					temp = getchar();
+					if (temp == 'y' || temp == 'Y') break;
 					else printf("계속 진행합니다.");
 				}
 				break;
 			case '2':
 				while (1)
 				{
+					printf("몇 번 공간에 방을 만드시겠습니까?");
 					scanf("%d", &roomnum);
 					if (roomnum > 0 && 20 >= roomnum)
 					{
@@ -122,9 +126,9 @@ void buildroom(shelter* m_base)
 							printf("나무를 %d개 소모합니다. 계속하시겠습니까?(y,n)>>", useitemcnt);
 							char temp = getchar();
 							bfclear();
-							if (temp = ('y' || 'Y'))
+							if (temp == 'y' || temp == 'Y')
 							{
-								for (i = 0; m_base->inven[i].name != "나무"; i++);
+								for (i = 0; !strcmp(m_base->inven[i].name, "나무"); i++);
 								if (m_base->inven[i].cur_cnt >= useitemcnt)
 								{
 									m_base->inven[i].cur_cnt -= useitemcnt;
@@ -138,13 +142,16 @@ void buildroom(shelter* m_base)
 					}
 					else printf("유효한 값을 입력해주세요.\n");
 					printf("그만두시겠습니까? (그만두려면 y 입력)>>");
-					if (getchar() == ('y' || 'Y')) break;
+					bfclear();
+					temp = getchar();
+					if (temp == 'y' || temp == 'Y')break;
 					else printf("계속 진행합니다.");
 				}
 				break;
 			case '3':
 				while (1)
 				{
+					printf("몇 번 공간에 방을 만드시겠습니까?");
 					scanf("%d", &roomnum);
 					if (roomnum > 0 && 20 >= roomnum)
 					{
@@ -155,9 +162,9 @@ void buildroom(shelter* m_base)
 							printf("나무를 %d개 소모합니다. 계속하시겠습니까?(y,n)>>", useitemcnt);
 							char temp = getchar();
 							bfclear();
-							if (temp = ('y' || 'Y'))
+							if (temp == 'y' || temp == 'Y')
 							{
-								for (i = 0; m_base->inven[i].name != "나무"; i++);
+								for (i = 0; !strcmp(m_base->inven[i].name, "나무"); i++);
 								if (m_base->inven[i].cur_cnt >= useitemcnt)
 								{
 									m_base->inven[i].cur_cnt -= useitemcnt;
@@ -171,12 +178,14 @@ void buildroom(shelter* m_base)
 					}
 					else printf("유효한 값을 입력해주세요.\n");
 					printf("그만두시겠습니까? (그만두려면 y 입력)>>");
-					if (getchar() == ('y' || 'Y')) break;
+					bfclear();
+					temp = getchar();
+					if (temp == 'y' || temp == 'Y') break;
 					else printf("계속 진행합니다.");
 				}
 				break;
 			default:
-				continue;
+				printf("유효한 값을 입력하세요\n");
 			}
 		}
 	}
@@ -329,7 +338,7 @@ void rescuetribe(shelter* base)
 void daytime(leader* user)
 {
 	int actcnt = DAYTIME_ACTCOUNT;
-	printf("\t%s의 경로당\n", user->username);
+	printf("\t\t%s의 경로당\n", user->username);
 	printf("------------------------------------------------\n\n");
 	printf("                생존자 수 : %d\n\n", user->base->curlife);
 	printf("------------------------------------------------\n\n");
@@ -358,6 +367,7 @@ void daytime(leader* user)
 }
 
 
+
 void main()
 {
 	leader realuser;
@@ -366,8 +376,9 @@ void main()
 	base.maxlife = 10;
 	base.curlife = base.maxlife;
 	realuser.base = &base;
-	strcpy(realuser.base->inven[3].name, "나무");
-	strcpy(realuser.base->inven[4].name, "돌");
+	strcpy(realuser.base->inven[0].name, "나무");
+	strcpy(realuser.base->inven[1].name, "돌");
+	realuser.base->inven[0].cur_cnt = 30;
 
 
 	printf("당신의 이름은 무엇입니까? (영어 20글자 한글 10글자 이내로)");
