@@ -64,22 +64,26 @@ struct leader
 void buildroom(shelter* m_base)
 {
 	{
-		/*for (int i = 0; i < 5; i++)
-			printf("%d번: %s\t%d번: %s\n%d번: %s\n%d번: %s", i + 1, roomtyper(m_base->roomspace[i].roomtype),i+5,roomtyper(m_base->roomspace[i+4].roomtype),i+10,roomtyper(m_base->roomspace[i+9].roomtype));*/
-		bfclear();
+		/*버그때문에 일단 봉인
+		for (int i = 0; i < 5; i++)
+			printf("%d번: %s\t%d번: %s\n%d번: %s\n%d번: %s", i + 1, roomtyper(m_base->roomspace[i].roomtype),
+			i+5,roomtyper(m_base->roomspace[i+4].roomtype),i+10,roomtyper(m_base->roomspace[i+9].roomtype));*/
 		int roomnum;
 		char temp;
+		printf("경로당 내부는 생각보다 넓다. 약간의 자원이 있다면 손볼 수 있을 것 같다...\n");
 		while (1)
 		{
-			printf("지을 건물 유형 선택");
-			temp = getchar();
+			puts("-----------------------------------------");
+			printf("1. 벽을 보강하고 초소를 만들자. (방어시설)\n2. 텃밭과 간이 침대를 만들어 생활공간을 만들자 (인구시설)\n3. 망루를 만들어 근처를 둘러보자 (탐색시설)\n0. 건설을 종료한다.\n어떤 시설을 제작해볼까? (숫자 입력)>>");
 			bfclear();
+			temp = getchar();
 			switch (temp)
 			{
 			case '1':
 				while (1)
 				{
-					printf("몇 번 공간에 방을 만드시겠습니까?");
+					printf("방어시설을 몇 번 공간에 만드시겠습니까?");
+					bfclear();
 					scanf("%d", &roomnum);
 					if (roomnum > 0 && 20 >= roomnum)
 					{
@@ -92,11 +96,12 @@ void buildroom(shelter* m_base)
 							char temp = getchar();
 							if (temp == 'y' || temp == 'Y')
 							{
-								for (i = 0; !strcmp(m_base->inven[i].name, "나무"); i++);
+								for (i = 0; i < 20; i++) { if (!strcmp(m_base->inven[i].name, "나무")) break; };
 								if (m_base->inven[i].cur_cnt >= useitemcnt)
 								{
 									m_base->inven[i].cur_cnt -= useitemcnt;
 									m_base->roomspace[roomnum - 1] = { 1,1,5 };
+									printf("건설을 성공적으로 마쳤습니다.\n");
 									break;
 								}
 								else printf("자원이 모자랍니다.\n");
@@ -105,17 +110,18 @@ void buildroom(shelter* m_base)
 						else printf("그 공간에는 이미 시설이 존재합니다.\n");
 					}
 					else printf("유효한 값을 입력해주세요.\n");
-					printf("그만두시겠습니까? (그만두려면 y 입력)>>");
+					printf("방어시설 건설을 그만두시겠습니까? (그만두려면 y 입력)>>");
 					bfclear();
 					temp = getchar();
 					if (temp == 'y' || temp == 'Y') break;
-					else printf("계속 진행합니다.");
+					else printf("계속 진행합니다.\n");
 				}
 				break;
 			case '2':
 				while (1)
 				{
-					printf("몇 번 공간에 방을 만드시겠습니까?");
+					printf("식당을 몇 번 공간에 만드시겠습니까?");
+					bfclear();
 					scanf("%d", &roomnum);
 					if (roomnum > 0 && 20 >= roomnum)
 					{
@@ -124,15 +130,16 @@ void buildroom(shelter* m_base)
 						if (m_base->roomspace[roomnum - 1].roomtype == 0)
 						{
 							printf("나무를 %d개 소모합니다. 계속하시겠습니까?(y,n)>>", useitemcnt);
-							char temp = getchar();
 							bfclear();
+							char temp = getchar();
 							if (temp == 'y' || temp == 'Y')
 							{
-								for (i = 0; !strcmp(m_base->inven[i].name, "나무"); i++);
+								for (i = 0; i < 20; i++) { if (!strcmp(m_base->inven[i].name, "나무")) break; };
 								if (m_base->inven[i].cur_cnt >= useitemcnt)
 								{
 									m_base->inven[i].cur_cnt -= useitemcnt;
 									m_base->roomspace[roomnum - 1] = { 2,1,5 };
+									printf("건설을 성공적으로 마쳤습니다.\n");
 									break;
 								}
 								else printf("자원이 모자랍니다.\n");
@@ -141,17 +148,18 @@ void buildroom(shelter* m_base)
 						else printf("그 공간에는 이미 시설이 존재합니다.\n");
 					}
 					else printf("유효한 값을 입력해주세요.\n");
-					printf("그만두시겠습니까? (그만두려면 y 입력)>>");
+					printf("식당 건설을 그만두시겠습니까? (그만두려면 y 입력)>>");
 					bfclear();
 					temp = getchar();
-					if (temp == 'y' || temp == 'Y')break;
-					else printf("계속 진행합니다.");
+					if (temp == 'y' || temp == 'Y') break;
+					else printf("계속 진행합니다.\n");
 				}
 				break;
 			case '3':
 				while (1)
 				{
-					printf("몇 번 공간에 방을 만드시겠습니까?");
+					printf("탐색거점을 몇 번 공간에 만드시겠습니까?");
+					bfclear();
 					scanf("%d", &roomnum);
 					if (roomnum > 0 && 20 >= roomnum)
 					{
@@ -164,11 +172,12 @@ void buildroom(shelter* m_base)
 							bfclear();
 							if (temp == 'y' || temp == 'Y')
 							{
-								for (i = 0; !strcmp(m_base->inven[i].name, "나무"); i++);
+								for (i = 0; i < 20; i++) { if (!strcmp(m_base->inven[i].name, "나무")) break; };
 								if (m_base->inven[i].cur_cnt >= useitemcnt)
 								{
 									m_base->inven[i].cur_cnt -= useitemcnt;
 									m_base->roomspace[roomnum - 1] = { 3,1,5 };
+									printf("건설을 성공적으로 마쳤습니다.\n");
 									break;
 								}
 								else printf("자원이 모자랍니다.\n");
@@ -177,16 +186,23 @@ void buildroom(shelter* m_base)
 						else printf("그 공간에는 이미 시설이 존재합니다.\n");
 					}
 					else printf("유효한 값을 입력해주세요.\n");
-					printf("그만두시겠습니까? (그만두려면 y 입력)>>");
+					printf("탐사시설 건설을 그만두시겠습니까? (그만두려면 y 입력)>>");
 					bfclear();
 					temp = getchar();
 					if (temp == 'y' || temp == 'Y') break;
-					else printf("계속 진행합니다.");
+					else printf("계속 진행합니다.\n");
 				}
+				break;
+			case '0':
 				break;
 			default:
 				printf("유효한 값을 입력하세요\n");
 			}
+			printf("건설작업을 종료할까요? (종료한다면 y)>>");
+			bfclear();
+			char acter = getchar();
+			if (acter == 'Y' || acter == 'y') break;
+			else printf("건설작업을 다시 시작합니다.\n\n");
 		}
 	}
 }
@@ -379,7 +395,7 @@ void main()
 	strcpy(realuser.base->inven[0].name, "나무");
 	strcpy(realuser.base->inven[1].name, "돌");
 	realuser.base->inven[0].cur_cnt = 30;
-
+	realuser.base->inven[0].stackmax = 30;
 
 	printf("당신의 이름은 무엇입니까? (영어 20글자 한글 10글자 이내로)");
 	scanf("%s", realuser.username);
