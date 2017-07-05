@@ -285,13 +285,14 @@ int finditem(shelter* base)
 //
 void rescuetribe(shelter* base)
 {
-	int srchbody,rqpoint;
+	int srchbody, rqpoint = 0;
 	if (base->curlife > 0)
 	{
 		int i;
 		while (1)
 		{
 			printf("파견할 인원 수는?");
+			bfclear();
 			scanf("%d", &srchbody);
 			if ((srchbody < base->curlife)&&(srchbody>0)) break;
 			else printf("파견인원은 최소 1인 이상은 되어야 하며, 기지에 한명 이상은 남아야 합니다.\n");
@@ -300,12 +301,13 @@ void rescuetribe(shelter* base)
 		while (1)
 		{
 			printf("자원을 장비하여 보내면 사람을 더 구할 수 있을지도 모릅니다.\n1. 나무\n2.돌\n0. 장비하지 않는다.");
+			bfclear();
 			char temp = getchar();
 			switch (temp)
 			{
 			case '1':
-				for (i = 0; base->inven[i].name != "나무"; i++) if (i>19) break;
-				printf("%s:몇 개 사용하시겠습니까?");
+				for (i = 0; i < 20; i++) { if (!strcmp(base->inven[i].name, "나무")) break; };
+				printf("%s:몇 개 사용하시겠습니까?",base->inven[i].name);
 				scanf("%d",&restemp);
 				if (restemp < base->inven[i].cur_cnt&&restemp>0)
 				{
@@ -316,7 +318,7 @@ void rescuetribe(shelter* base)
 				else printf("갯수가 너무 크거나 작습니다.");
 				break;
 			case '2':
-				for (i = 0; base->inven[i].name != "돌"; i++) if (i>19) break;
+				for (i = 0; i < 20; i++) { if (!strcmp(base->inven[i].name, "돌")) break; };
 				printf("%s:몇 개 사용하시겠습니까?");
 				scanf("%d", &restemp);
 				if (restemp < base->inven[i].cur_cnt&&restemp>0)
@@ -332,10 +334,12 @@ void rescuetribe(shelter* base)
 				break;
 			}
 			printf("자원추가를 더 할까요? (하지 않으려면 N 입력)");
+			bfclear();
 			char lastpic = getchar();
-			if (lastpic == ('N'||'n')) break;
+			if (lastpic == 'n' || lastpic == 'N') break;
 		}
-		int rslt = rand() % (srchbody / 5) + (rqpoint == 0 ? 0 : rand() % (rqpoint / 5));
+		//0으로 나눔 예외 발생. 살려줘ㅓㅓㅓㅓㅓ
+		int rslt = rand() % ((srchbody / 5) + (rqpoint == 0 ? 0 : rand() % (rqpoint / 5)))==0?1: (srchbody / 5) + (rqpoint == 0 ? 0 : rand() % (rqpoint / 5));
 		if (rslt + base->curlife < base->maxlife)
 		{
 			base->curlife += rslt;
@@ -350,13 +354,39 @@ void rescuetribe(shelter* base)
 	}
 	else printf("파견보낼 사람이 없습니다.\n");
 }
+void defsrchchk(leader* user)
+{
+	user->base->def = 0;
+	user->base->maxlife = 10;
+	user->base->inven[j].stackmax = 30;
+	for (int i = 0; i < 20; i++)
+	{
+		switch (user->base->roomspace[i].roomtype)
+		{
+		case 1:
+			user->base->def += user->base->roomspace[i].aply_bonus;
+			break;
+		case 2:
+			user->base->maxlife += user->base->roomspace[i].aply_bonus;
+			break;
+		case 3:
+			for (int j = 0; j < 20; j++)
+			{
+				user->base->inven[j].stackmax += user->base->roomspace[i].aply_bonus;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+}
 
 void daytime(leader* user)
 {
 	int actcnt = DAYTIME_ACTCOUNT;
 	printf("\t\t%s의 경로당\n", user->username);
 	printf("------------------------------------------------\n\n");
-	printf("                생존자 수 : %d\n\n", user->base->curlife);
+	printf("                생존자 수 : %d/%d\n\n", user->base->maxlife,user->base->curlife);
 	printf("------------------------------------------------\n\n");
 
 	printf("지금은 낮 시간이다. 아무래도 좀비들의 활동이 줄어들 것 같다.\n");
@@ -369,17 +399,31 @@ void daytime(leader* user)
 		{
 		case 'r': case 'R':
 			buildroom(user->base); actcnt--;
+			defsrchchk(user);
 			break;
 		case 'f': case 'F':
 			if (finditem(user->base) != 0) actcnt--;
 			break;
 		case 's': case 'S':
-			rescuetribe(user->base);
+			rescuetribe(user->base); actcnt--;
+			break;
 		default:
 			printf("잘못 입력하셨습니다. 다시 입력하세요\n");
 			break;
 		}
 	}
+}
+
+void nighttime(leader* user, int level)
+{
+	printf("석양이.."); Sleep(1000); printf("점점.."); Sleep(800);
+	printf("진다"); Sleep(500); printf("."); Sleep(300); printf("."); Sleep(300); printf("."); Sleep(300); puts("");
+	printf("밤이 되었다. 좀비로부터 살아남아야 한다..\n");
+	int zombiemax = ((level*level) / 2)+3;
+	int zombiemin = zombiemax / 2;
+	int curwave = (rand() % (zombiemax-zombiemin)) + zombiemin;
+	printf("좀비 %d마리가 이쪽으로 오고 있다..\n", curwave);
+	
 }
 
 
@@ -388,6 +432,7 @@ void main()
 {
 	leader realuser;
 	shelter base;
+	int liveday = 1;
 
 	base.maxlife = 10;
 	base.curlife = base.maxlife;
@@ -406,6 +451,7 @@ void main()
 	while (1)
 	{
 		daytime(&realuser);
-		break;
+		nighttime(&realuser, liveday);
+		liveday++;
 	}
 }
