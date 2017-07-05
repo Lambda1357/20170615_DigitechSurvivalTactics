@@ -364,8 +364,7 @@ void rescuetribe(shelter* base)
 			char lastpic = getchar();
 			if (lastpic == 'n' || lastpic == 'N') break;
 		}
-		//0À¸·Î ³ª´® ¿¹¿Ü ¹ß»ı. »ì·ÁÁà¤Ã¤Ã¤Ã¤Ã¤Ã
-		int rslt = rand() % ((srchbody / 5) + (rqpoint == 0 ? 0 : rand() % (rqpoint / 5))) == 0 ? 1 : (srchbody / 5) + (rqpoint == 0 ? 0 : rand() % (rqpoint / 5));
+		int rslt = rand() % ((srchbody / 5) + (rqpoint == 0 ? 0 : rand() % (rqpoint / 5))+1);
 		if (rslt + base->curlife < base->maxlife)
 		{
 			base->curlife += rslt;
