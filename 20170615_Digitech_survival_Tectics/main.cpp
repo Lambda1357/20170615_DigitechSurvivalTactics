@@ -7,10 +7,36 @@
 //낮의 활동갯수 정의
 #define DAYTIME_ACTCOUNT 3
 
+void gotoxy(int x, int y)
+{
+	COORD pos = { x - 1, y - 1 };
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), pos);
+}
+
+void cursorOff(void)
+{
+	CONSOLE_CURSOR_INFO Information;
+	Information.dwSize = 1;
+	Information.bVisible = FALSE;
+
+	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &Information);
+}
+
 void bfclear()
 {
 	while (getchar() != '\n');
 }
+
+void cursorOn(void)
+{
+	CONSOLE_CURSOR_INFO Information;
+
+	Information.dwSize = 20;
+	Information.bVisible = TRUE;
+
+	SetConsoleCursorInfo(GetStdHandle(STD_OUTPUT_HANDLE), &Information);
+}
+
 char* roomtyper(int typecode)
 {
 	switch (typecode)
@@ -230,14 +256,14 @@ int finditem(shelter* base)
 			for (i = 0; strcmp(base->inven[i].name, "나무") != 0; i++) if (i > 19) break;
 			if (i < 20)
 			{
-				printf("나무를 %d개 찾았다!",rslt);
+				printf("나무를 %d개 찾았다!", rslt);
 				for (int j = 0; rslt >= 0; j++)
 				{
 					if (base->inven[i].cur_cnt >= base->inven[i].stackmax) break;
 					base->inven[i].cur_cnt++; rslt--;
 				}
 				printf("\t현재 갯수 %d개", base->inven[i].cur_cnt);
-				if (rslt != 0) printf("공간이 모자라 %d개의 자원이 버려졌습니다.",rslt);
+				if (rslt != 0) printf("공간이 모자라 %d개의 자원이 버려졌습니다.", rslt);
 				printf("\n");
 				return 1;
 			}
@@ -294,7 +320,7 @@ void rescuetribe(shelter* base)
 			printf("파견할 인원 수는?");
 			bfclear();
 			scanf("%d", &srchbody);
-			if ((srchbody < base->curlife)&&(srchbody>0)) break;
+			if ((srchbody < base->curlife) && (srchbody > 0)) break;
 			else printf("파견인원은 최소 1인 이상은 되어야 하며, 기지에 한명 이상은 남아야 합니다.\n");
 		}
 		int restemp;
@@ -307,8 +333,8 @@ void rescuetribe(shelter* base)
 			{
 			case '1':
 				for (i = 0; i < 20; i++) { if (!strcmp(base->inven[i].name, "나무")) break; };
-				printf("%s:몇 개 사용하시겠습니까?",base->inven[i].name);
-				scanf("%d",&restemp);
+				printf("%s:몇 개 사용하시겠습니까?", base->inven[i].name);
+				scanf("%d", &restemp);
 				if (restemp < base->inven[i].cur_cnt&&restemp>0)
 				{
 					base->inven[i].cur_cnt -= restemp;
@@ -339,7 +365,7 @@ void rescuetribe(shelter* base)
 			if (lastpic == 'n' || lastpic == 'N') break;
 		}
 		//0으로 나눔 예외 발생. 살려줘ㅓㅓㅓㅓㅓ
-		int rslt = rand() % ((srchbody / 5) + (rqpoint == 0 ? 0 : rand() % (rqpoint / 5)))==0?1: (srchbody / 5) + (rqpoint == 0 ? 0 : rand() % (rqpoint / 5));
+		int rslt = rand() % ((srchbody / 5) + (rqpoint == 0 ? 0 : rand() % (rqpoint / 5))) == 0 ? 1 : (srchbody / 5) + (rqpoint == 0 ? 0 : rand() % (rqpoint / 5));
 		if (rslt + base->curlife < base->maxlife)
 		{
 			base->curlife += rslt;
@@ -349,7 +375,7 @@ void rescuetribe(shelter* base)
 		{
 			int overbody = ((base->curlife + rslt) - base->maxlife);
 			base->curlife += rslt - overbody;
-			printf("%d명의 사람을 구출했지만, 정착지의 공간이 모자라 %d명의 사람들만 정착지에 들어왔다.\n",rslt,rslt-overbody);
+			printf("%d명의 사람을 구출했지만, 정착지의 공간이 모자라 %d명의 사람들만 정착지에 들어왔다.\n", rslt, rslt - overbody);
 		}
 	}
 	else printf("파견보낼 사람이 없습니다.\n");
@@ -358,7 +384,10 @@ void defsrchchk(leader* user)
 {
 	user->base->def = 0;
 	user->base->maxlife = 10;
-	user->base->inven[j].stackmax = 30;
+	for (int j = 0; j < 20; j++)
+	{
+		user->base->inven[j].stackmax = 30;
+	}
 	for (int i = 0; i < 20; i++)
 	{
 		switch (user->base->roomspace[i].roomtype)
@@ -386,7 +415,7 @@ void daytime(leader* user)
 	int actcnt = DAYTIME_ACTCOUNT;
 	printf("\t\t%s의 경로당\n", user->username);
 	printf("------------------------------------------------\n\n");
-	printf("                생존자 수 : %d/%d\n\n", user->base->maxlife,user->base->curlife);
+	printf("                생존자 수 : %d/%d\n\n", user->base->maxlife, user->base->curlife);
 	printf("------------------------------------------------\n\n");
 
 	printf("지금은 낮 시간이다. 아무래도 좀비들의 활동이 줄어들 것 같다.\n");
@@ -419,39 +448,174 @@ void nighttime(leader* user, int level)
 	printf("석양이.."); Sleep(1000); printf("점점.."); Sleep(800);
 	printf("진다"); Sleep(500); printf("."); Sleep(300); printf("."); Sleep(300); printf("."); Sleep(300); puts("");
 	printf("밤이 되었다. 좀비로부터 살아남아야 한다..\n");
-	int zombiemax = ((level*level) / 2)+3;
+	int zombiemax = ((level*level) / 2) + 3;
 	int zombiemin = zombiemax / 2;
-	int curwave = (rand() % (zombiemax-zombiemin)) + zombiemin;
+	int curwave = (rand() % (zombiemax - zombiemin)) + zombiemin;
 	printf("좀비 %d마리가 이쪽으로 오고 있다..\n", curwave);
-	
+	Sleep(1000);
+	if (curwave - user->base->def > user->base->curlife)
+	{
+		printf("수많은 좀비들의 습격을");
+		if ((curwave - user->base->def) - user->base->curlife < 3)
+		{
+			printf(" 잘 막아내는 듯 했으나, 소수의 좀비들이 바리케이트를 넘어왔다!\n");
+			if (((rand() % 6) + 1) < 3)
+			{
+				int hidepeople = (user->base->curlife / 10) + 1;
+				printf("아수라장이 된 경로당에서, %d명만이 간신히 숨어서 버텨내는 데 성공했다..\n", hidepeople);
+				user->base->curlife = hidepeople;
+			}
+			else
+			{
+				printf("좀비들이 들어오자 아수라장이 된 경로당은 속수무책으로 좀비의 소굴어 되었다..\n");
+				user->base->curlife = 0;
+			}
+		}
+		else
+		{
+			printf("막아내기란 불가능했다..\n");
+			user->base->curlife = 0;
+		}
+	}
+	else
+	{
+		int deathpeople = 0;
+		for (int i = (curwave - user->base->def); i > 0; i--)
+		{
+			if ((rand() % 100) < 33)
+			{
+				user->base->curlife--;
+				deathpeople++;
+			}
+		}
+		if (deathpeople == 0) printf("이번 밤은 무사히 지나갔다. 다행스럽게 사망자는 아무도 없었다.\n");
+		else
+		{
+			printf("이번 밤은 좀비로부터 살아남았다.. %d명의 사람이 좀비와 교전중 세상을 떠났다.\n", deathpeople);
+		}
+	}
 }
 
+void logo()
+{
+	cursorOff();
+	int x,y;
+	while (1)
+	{
+		x = (rand() % 4) + 3, y = rand() % 4;
+		gotoxy(x, y); puts("          살       살");
+		gotoxy(x, y+1); puts("        살  살     살                                                남              ");
+		gotoxy(x, y+2); puts("       살    살    살살살                               남           남                                   라라라라라라    라");
+		gotoxy(x, y+3); puts("      살      살   살                     아            남           남남남                 아                      라    라");
+		gotoxy(x, y+4); puts("                   살             아      아            남           남            아       아                      라    라");
+		gotoxy(x, y+5); puts("                               아    아   아아아        남남남남남   남         아    아    아아아        라라라라라라    라라라라");
+		gotoxy(x, y+6); puts("           살살살살            아    아   아                         남         아    아    아            라              라");
+		gotoxy(x, y+7); puts("                 살             아아아    아              남남남남남남           아아아     아            라              라");
+		gotoxy(x, y+8); puts("           살살살살                       아              남        남                      아            라라라라라라    라");
+		gotoxy(x, y+9); puts("           살                                             남남남남남남");
+		gotoxy(x, y+10); puts("           살살살살");                                            
+		gotoxy(x, y+14); puts("                              디           지지지지지지   지        텍텍텍텍텍    텍 텍           ""                        ""   !!!");
+		gotoxy(x, y+15); puts("              디디디디디디디  디                    지    지        텍            텍 텍         ""   리리리리리리    리   ""     !!!");
+		gotoxy(x, y+16); puts("              디              디                   지     지        텍텍텍텍  텍텍텍 텍                      리    리        !!!");
+		gotoxy(x, y+17); puts("              디              디                 지       지        텍            텍 텍                      리    리        !!!");
+		gotoxy(x, y+18); puts("              디              디               지  지     지        텍텍텍텍텍    텍 텍            리리리리리리    리        !!!");
+		gotoxy(x, y+19); puts("              디              디             지     지    지                                       리              리        !!!");
+		gotoxy(x, y+20); puts("              디디디디디디디  디           지        지   지             텍텍텍텍텍텍              리              리");
+		gotoxy(x, y+21); puts("                              디                                                    텍             리리리리리리    리        !!!");
+		gotoxy(x, y+22); puts("                                                                                    텍");
+		puts(""); puts("");
+		puts("						아무키나 눌러서 게임 시작");
+		Sleep(1000);
+		system("cls");
+		if (kbhit()) 
+		{
+			cursorOn();
+			break; 
+		}
+	}
+}
+
+void gameover()
+{
+	puts("		      !,    ");
+	puts("	             ,:");
+	puts("	          = #**: .     ");
+	puts("	         !=.**.:~#*- ");
+	puts("	             *.    ");
+	puts("	             ==     ");
+	puts("	            !;~;    ");
+	puts("	           .* ~-$    ");
+	puts("	          ~:!  *: -     ");
+	puts("	        ~; .    ., -@  ");
+	puts("	        ;.~      :!$*   ");
+	puts("	        ;       !  ~@  ");
+	puts("	        !          ~# ");
+	puts("	        ;          ~$");
+	puts("	        -  -.      ~# ");
+	puts("	        !=;.    $. *@ ");
+	puts("	        ;..........-$  ");
+	puts("	      -------~-;;;;~,,,;");
+	puts("	     ======;;*####@#=*:; : ");
+	puts(""); puts("");
+	puts(" ::::::::      :::     ::::    ::::  :::::::::: ");
+	puts(":+:    :+:   :+: :+:   +:+:+: :+:+:+ :+:        ");
+	puts("+:+         +:+   +:+  +:+ +:+:+ +:+ +:+        ");
+	puts(":#:        +#++:++#++: +#+  +:+  +#+ +#++:++#   ");
+	puts("+#+   +#+# +#+     +#+ +#+       +#+ +#+        ");
+	puts("#+#    #+# #+#     #+# #+#       #+# #+#        ");
+	puts(" ########  ###     ### ###       ### ########## ");
+	puts(" ::::::::  :::     ::: :::::::::::   :::::::::  ");
+	puts(":+:    :+: :+:     :+: :+:           :+:    :+: ");
+	puts("+:+    +:+ +:+     +:+ +:+           +:+    +:+ ");
+	puts("+#+    +:+ +#+     +:+ +#++:++:+#    +#++:++#:  ");
+	puts("+#+    +#+  +#+   +#+  +#+           +#+    +#+ ");
+	puts("#+#    #+#   #+#+#+#   #+#           #+#    #+# ");
+	puts(" ########      ###     ###########   ###    ### ");
+}
 
 
 void main()
 {
 	leader realuser;
 	shelter base;
-	int liveday = 1;
-
-	base.maxlife = 10;
-	base.curlife = base.maxlife;
-	realuser.base = &base;
-	strcpy(realuser.base->inven[0].name, "나무");
-	strcpy(realuser.base->inven[1].name, "돌");
-	realuser.base->inven[0].cur_cnt = 30;
-	realuser.base->inven[0].stackmax = 30;
-
-	printf("당신의 이름은 무엇입니까? (영어 20글자 한글 10글자 이내로)");
-	scanf("%s", realuser.username);
-
-
-	for (int i = 0; i < 20; i++)
-		realuser.base->roomspace[i].roomtype = 0;
+	int liveday;
 	while (1)
 	{
-		daytime(&realuser);
-		nighttime(&realuser, liveday);
-		liveday++;
+		liveday = 0;
+		base.maxlife = 10;
+		base.curlife = base.maxlife;
+		realuser.base = &base;
+		strcpy(realuser.base->inven[0].name, "나무");
+		strcpy(realuser.base->inven[1].name, "돌");
+		realuser.base->inven[0].cur_cnt = 30;
+		realuser.base->inven[0].stackmax = 30;
+
+		logo();
+
+		printf("당신의 이름은 무엇입니까? (영어 20글자 한글 10글자 이내로)");
+		scanf("%s", realuser.username);
+
+
+		for (int i = 0; i < 20; i++)
+			realuser.base->roomspace[i].roomtype = 0;
+		while (1)
+		{
+			daytime(&realuser);
+			nighttime(&realuser, liveday);
+			if (realuser.base->curlife <= 0)
+			{
+				gameover();
+				puts("===========================================");
+				printf("\t모두가 죽었습니다. 살아남은 사람은 없습니다.\n");
+				break;
+			}
+			liveday++;
+		}
+		printf("\t%d일간 살아남았다.");
+		printf("새로운 게임을 시작하시겠습니까? (Y를 입력해 새 게임 시작)");
+		bfclear();
+		char resel = getchar();
+		if (!(resel == 'y' || resel == 'Y')) break;
+		else system("cls");
 	}
 }
